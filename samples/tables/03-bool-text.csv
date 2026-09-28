@@ -1,0 +1,11 @@
+user_id,active,notify,subscribe,last_login
+1,true,TRUE,1,从未
+2,false,False,0,从未
+3,true,true,1,2024-05-01
+4,false,false,0,从未
+5,true,TRUE,1,2024-05-03
+6,false,False,0,从未
+7,true,true,1,从未
+8,false,false,0,从未
+9,yes,TRUE,1,2024-05-09
+10,no,False,0,从未

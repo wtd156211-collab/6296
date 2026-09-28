@@ -1,0 +1,81 @@
+{
+  "table": "03-bool-text.csv",
+  "row_count": 10,
+  "column_count": 5,
+  "columns": [
+    {
+      "name": "user_id",
+      "type": "int",
+      "null_count": 0,
+      "non_null_count": 10,
+      "type_counts": {
+        "int": 10
+      }
+    },
+    {
+      "name": "active",
+      "type": "bool",
+      "null_count": 0,
+      "non_null_count": 10,
+      "type_counts": {
+        "bool": 8,
+        "text": 2
+      }
+    },
+    {
+      "name": "notify",
+      "type": "bool",
+      "null_count": 0,
+      "non_null_count": 10,
+      "type_counts": {
+        "bool": 10
+      }
+    },
+    {
+      "name": "subscribe",
+      "type": "int",
+      "null_count": 0,
+      "non_null_count": 10,
+      "type_counts": {
+        "int": 10
+      }
+    },
+    {
+      "name": "last_login",
+      "type": "mixed",
+      "null_count": 0,
+      "non_null_count": 10,
+      "type_counts": {
+        "date": 3,
+        "text": 7
+      }
+    }
+  ],
+  "conflicts": [
+    {
+      "column": "active",
+      "types": [
+        "bool",
+        "text"
+      ],
+      "evidence_count": 2,
+      "evidence_rows": [
+        9,
+        10
+      ]
+    },
+    {
+      "column": "last_login",
+      "types": [
+        "date",
+        "text"
+      ],
+      "evidence_count": 3,
+      "evidence_rows": [
+        3,
+        5,
+        9
+      ]
+    }
+  ]
+}

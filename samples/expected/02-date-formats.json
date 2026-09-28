@@ -1,0 +1,57 @@
+{
+  "table": "02-date-formats.csv",
+  "row_count": 9,
+  "column_count": 4,
+  "columns": [
+    {
+      "name": "event_id",
+      "type": "int",
+      "null_count": 0,
+      "non_null_count": 9,
+      "type_counts": {
+        "int": 9
+      }
+    },
+    {
+      "name": "created_on",
+      "type": "date",
+      "null_count": 0,
+      "non_null_count": 9,
+      "type_counts": {
+        "date": 9
+      }
+    },
+    {
+      "name": "updated_on",
+      "type": "date",
+      "null_count": 0,
+      "non_null_count": 9,
+      "type_counts": {
+        "date": 8,
+        "text": 1
+      }
+    },
+    {
+      "name": "note",
+      "type": "text",
+      "null_count": 0,
+      "non_null_count": 9,
+      "type_counts": {
+        "text": 9
+      }
+    }
+  ],
+  "conflicts": [
+    {
+      "column": "updated_on",
+      "types": [
+        "date",
+        "text"
+      ],
+      "evidence_count": 1,
+      "evidence_rows": [
+        6
+      ]
+    }
+  ]
+}

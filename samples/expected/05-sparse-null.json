@@ -1,0 +1,66 @@
+{
+  "table": "05-sparse-null.csv",
+  "row_count": 20,
+  "column_count": 5,
+  "columns": [
+    {
+      "name": "record_id",
+      "type": "int",
+      "null_count": 0,
+      "non_null_count": 20,
+      "type_counts": {
+        "int": 20
+      }
+    },
+    {
+      "name": "email",
+      "type": "text",
+      "null_count": 17,
+      "non_null_count": 3,
+      "type_counts": {
+        "text": 3
+      }
+    },
+    {
+      "name": "score",
+      "type": "unknown",
+      "null_count": 18,
+      "non_null_count": 2,
+      "type_counts": {
+        "float": 2
+      }
+    },
+    {
+      "name": "flag",
+      "type": "bool",
+      "null_count": 8,
+      "non_null_count": 12,
+      "type_counts": {
+        "bool": 9,
+        "text": 3
+      }
+    },
+    {
+      "name": "remark",
+      "type": "empty",
+      "null_count": 20,
+      "non_null_count": 0,
+      "type_counts": {}
+    }
+  ],
+  "conflicts": [
+    {
+      "column": "flag",
+      "types": [
+        "bool",
+        "text"
+      ],
+      "evidence_count": 3,
+      "evidence_rows": [
+        10,
+        11,
+        12
+      ]
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "table": "04-tail-outlier.csv",
+  "row_count": 12,
+  "column_count": 4,
+  "columns": [
+    {
+      "name": "batch_id",
+      "type": "int",
+      "null_count": 0,
+      "non_null_count": 12,
+      "type_counts": {
+        "int": 12
+      }
+    },
+    {
+      "name": "reading",
+      "type": "float",
+      "null_count": 0,
+      "non_null_count": 12,
+      "type_counts": {
+        "float": 11,
+        "text": 1
+      }
+    },
+    {
+      "name": "status",
+      "type": "text",
+      "null_count": 0,
+      "non_null_count": 12,
+      "type_counts": {
+        "date": 1,
+        "text": 11
+      }
+    },
+    {
+      "name": "code",
+      "type": "int",
+      "null_count": 0,
+      "non_null_count": 12,
+      "type_counts": {
+        "int": 10,
+        "text": 2
+      }
+    }
+  ],
+  "conflicts": [
+    {
+      "column": "reading",
+      "types": [
+        "float",
+        "text"
+      ],
+      "evidence_count": 1,
+      "evidence_rows": [
+        11
+      ]
+    },
+    {
+      "column": "status",
+      "types": [
+        "date",
+        "text"
+      ],
+      "evidence_count": 1,
+      "evidence_rows": [
+        12
+      ]
+    },
+    {
+      "column": "code",
+      "types": [
+        "int",
+        "text"
+      ],
+      "evidence_count": 2,
+      "evidence_rows": [
+        11,
+        12
+      ]
+    }
+  ]
+}
