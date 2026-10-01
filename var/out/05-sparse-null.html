@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>05-sparse-null.csv</title>
+<style>
+body { font-family: "Segoe UI", "Microsoft YaHei", sans-serif; margin: 24px; color: #222; }
+h1 { font-size: 20px; margin: 0 0 4px; }
+.meta { color: #666; font-size: 13px; margin-bottom: 16px; }
+h2 { font-size: 15px; margin: 20px 0 8px; }
+.legend span { display: inline-block; margin-right: 14px; font-size: 12px; }
+.legend i { display: inline-block; width: 12px; height: 12px; margin-right: 4px; vertical-align: -1px; }
+canvas { display: block; margin-bottom: 8px; cursor: pointer; }
+table { border-collapse: collapse; font-size: 13px; }
+th, td { border: 1px solid #ccc; padding: 4px 10px; text-align: left; }
+th { background: #f4f4f4; }
+tr.conflict td { background: #fdecea; }
+#detail { margin-top: 16px; font-size: 13px; }
+#detail table { margin-top: 6px; }
+.hint { color: #888; font-size: 12px; }
+</style>
+</head>
+<body>
+<h1 id="title"></h1>
+<div class="meta" id="meta"></div>
+<div class="legend" id="legend"></div>
+<h2>列 × 类型 匹配热力图（点击行查看证据）</h2>
+<canvas id="heatmap"></canvas>
+<h2>各列类型分布</h2>
+<canvas id="bars"></canvas>
+<h2>冲突清单</h2>
+<div id="conflicts"></div>
+<div id="detail"><span class="hint">点击热力图中的行，查看该列的类型冲突证据。</span></div>
+<script>
+"use strict";
+const REPORT = {"table": "05-sparse-null.csv", "row_count": 20, "column_count": 5, "columns": [{"name": "record_id", "type": "int", "null_count": 0, "non_null_count": 20, "type_counts": {"int": 20}}, {"name": "email", "type": "text", "null_count": 17, "non_null_count": 3, "type_counts": {"text": 3}}, {"name": "score", "type": "unknown", "null_count": 18, "non_null_count": 2, "type_counts": {"float": 2}}, {"name": "flag", "type": "bool", "null_count": 8, "non_null_count": 12, "type_counts": {"bool": 9, "text": 3}}, {"name": "remark", "type": "empty", "null_count": 20, "non_null_count": 0, "type_counts": {}}], "conflicts": [{"column": "flag", "types": ["bool", "text"], "evidence_count": 3, "evidence_rows": [10, 11, 12]}]};
+const EVIDENCE = {"flag": [{"row": 10, "type": "text", "value": "unknown"}, {"row": 11, "type": "text", "value": "unknown"}, {"row": 12, "type": "text", "value": "unknown"}]};
+const TYPE_COLORS = {"bool": "#4e79a7", "int": "#59a14f", "float": "#f28e2b", "date": "#e15759", "text": "#9c755f"};
+const NULL_COLOR = "#e8e8e8";
+const TYPES = ["bool", "int", "float", "date", "text"];
+const CONFLICT_COLUMNS = new Set(REPORT.conflicts.map(c => c.column));
+
+document.getElementById("title").textContent = REPORT.table;
+document.getElementById("meta").textContent =
+  "数据行 " + REPORT.row_count + " · 列 " + REPORT.column_count +
+  " · 冲突列 " + REPORT.conflicts.length;
+document.getElementById("legend").innerHTML = TYPES.map(t =>
+  "<span><i style=\"background:" + TYPE_COLORS[t] + "\"></i>" + t + "</span>"
+).join("") + "<span><i style=\"background:" + NULL_COLOR + "\"></i>空值</span>";
+
+function makeCanvas(id, width, height) {
+  const canvas = document.getElementById(id);
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = width * ratio;
+  canvas.height = height * ratio;
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+  const ctx = canvas.getContext("2d");
+  ctx.scale(ratio, ratio);
+  return ctx;
+}
+
+const cols = REPORT.columns;
+const labelWidth = 160;
+const cellWidth = 90;
+const cellHeight = 22;
+const pad = 4;
+const heatWidth = labelWidth + cellWidth * TYPES.length + 90;
+const heatHeight = cellHeight * (cols.length + 1) + pad * 2;
+const heatCtx = makeCanvas("heatmap", heatWidth, heatHeight);
+
+heatCtx.font = "12px sans-serif";
+heatCtx.textBaseline = "middle";
+TYPES.forEach((t, i) => {
+  heatCtx.fillStyle = "#555";
+  heatCtx.textAlign = "center";
+  heatCtx.fillText(t, labelWidth + cellWidth * i + cellWidth / 2, pad + cellHeight / 2);
+});
+cols.forEach((col, r) => {
+  const y = pad + cellHeight * (r + 1);
+  heatCtx.fillStyle = "#222";
+  heatCtx.textAlign = "right";
+  heatCtx.fillText(col.name, labelWidth - 8, y + cellHeight / 2);
+  const nonNull = col.non_null_count || 1;
+  TYPES.forEach((t, i) => {
+    const x = labelWidth + cellWidth * i;
+    const count = col.type_counts[t] || 0;
+    heatCtx.fillStyle = NULL_COLOR;
+    heatCtx.fillRect(x + 1, y + 1, cellWidth - 2, cellHeight - 2);
+    if (count > 0) {
+      heatCtx.globalAlpha = Math.max(0.15, count / nonNull);
+      heatCtx.fillStyle = TYPE_COLORS[t];
+      heatCtx.fillRect(x + 1, y + 1, cellWidth - 2, cellHeight - 2);
+      heatCtx.globalAlpha = 1;
+      heatCtx.fillStyle = "#111";
+      heatCtx.textAlign = "center";
+      heatCtx.fillText(String(count), x + cellWidth / 2, y + cellHeight / 2);
+    }
+  });
+  heatCtx.fillStyle = "#333";
+  heatCtx.textAlign = "left";
+  heatCtx.fillText("→ " + col.type, labelWidth + cellWidth * TYPES.length + 8, y + cellHeight / 2);
+  if (CONFLICT_COLUMNS.has(col.name)) {
+    heatCtx.strokeStyle = "#d62728";
+    heatCtx.lineWidth = 2;
+    heatCtx.strokeRect(labelWidth + 1, y + 1, cellWidth * TYPES.length - 2, cellHeight - 2);
+    TYPES.forEach((t, i) => {
+      if ((col.type_counts[t] || 0) > 0 && t !== col.type) {
+        heatCtx.strokeRect(labelWidth + cellWidth * i + 2, y + 2, cellWidth - 4, cellHeight - 4);
+      }
+    });
+  }
+});
+
+const barWidth = 420;
+const barsHeight = cellHeight * cols.length + pad * 2;
+const barCtx = makeCanvas("bars", labelWidth + barWidth + 60, barsHeight);
+cols.forEach((col, r) => {
+  const y = pad + cellHeight * r;
+  barCtx.fillStyle = "#222";
+  barCtx.textAlign = "right";
+  barCtx.textBaseline = "middle";
+  barCtx.fillText(col.name, labelWidth - 8, y + cellHeight / 2);
+  barCtx.fillStyle = NULL_COLOR;
+  barCtx.fillRect(labelWidth, y + 3, barWidth, cellHeight - 6);
+  const total = col.null_count + col.non_null_count || 1;
+  let x = labelWidth;
+  TYPES.forEach(t => {
+    const count = col.type_counts[t] || 0;
+    if (!count) return;
+    const w = barWidth * count / total;
+    barCtx.fillStyle = TYPE_COLORS[t];
+    barCtx.fillRect(x, y + 3, w, cellHeight - 6);
+    x += w;
+  });
+  barCtx.fillStyle = "#333";
+  barCtx.textAlign = "left";
+  barCtx.fillText(col.type, labelWidth + barWidth + 8, y + cellHeight / 2);
+});
+
+const conflictBox = document.getElementById("conflicts");
+if (REPORT.conflicts.length === 0) {
+  conflictBox.innerHTML = "<p class=\"hint\">无类型冲突。</p>";
+} else {
+  let html = "<table><tr><th>列名</th><th>类型组合</th><th>证据数</th><th>证据行号</th></tr>";
+  REPORT.conflicts.forEach(c => {
+    html += "<tr class=\"conflict\"><td>" + c.column + "</td><td>" +
+      c.types.join(" + ") + "</td><td>" + c.evidence_count + "</td><td>" +
+      c.evidence_rows.join(", ") + "</td></tr>";
+  });
+  conflictBox.innerHTML = html + "</table>";
+}
+
+function showDetail(colName) {
+  const col = cols.find(c => c.name === colName);
+  const box = document.getElementById("detail");
+  let html = "<h2>列证据：" + colName + "（判定类型 " + col.type + "）</h2>";
+  const entries = EVIDENCE[colName] || [];
+  if (entries.length === 0) {
+    html += "<p class=\"hint\">该列无冲突证据。</p>";
+  } else {
+    html += "<table><tr><th>数据行号</th><th>单元格类型</th><th>规范化值</th></tr>";
+    entries.forEach(e => {
+      html += "<tr><td>" + e.row + "</td><td>" + e.type + "</td><td>" +
+        e.value.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</td></tr>";
+    });
+    html += "</table>";
+  }
+  box.innerHTML = html;
+}
+
+document.getElementById("heatmap").addEventListener("click", event => {
+  const rect = event.target.getBoundingClientRect();
+  const row = Math.floor((event.clientY - rect.top - pad) / cellHeight) - 1;
+  if (row >= 0 && row < cols.length) showDetail(cols[row].name);
+});
+</script>
+</body>
+</html>
